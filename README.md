@@ -54,7 +54,7 @@ To configure the bot, you must first create a new discord application. Then (aft
 <br>
 
 ## Task List
-Below is a simple list of features that I am currently working on implementing.
+Below is a simple list of features that I am hoping to complete in the near future.
 
 - [x] Purge command that allows you to delete x amount of messages from a channel.
 - [ ] Ban command: ***ban [user] (reason)***.
