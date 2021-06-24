@@ -9,7 +9,7 @@ This repository will be kept up to date and I will add some new features here an
 | kick    | *!kick [user] [reason]*        | Kicks the specified user from the server with the given reason.                                                                                                                                                                       |
 | mute    | *!mute [user] [time] [reason]* | Mutes the specified user so that they can not type or talk for an amount of time. The *time* parameter accepts values like **12m**, **3d**, **4h**, and **2w** (the character representing the first letter of the time measurement). |
 | purge   | *!purge [channel] [amount]*    | Deletes an amount of messages from the specified channel.                                                                                                                                                                             |
-| verify  | *!verify*                      | Launches the verification system for the sender *(keep in mind this command can only be called in the verification channel and only by unverified members)*.                                                                          |
+| verify  | *!verify*                      | Launches the [verification system](https://github.com/max-prihodk0/FencingtrackerBot/blob/main/README.md#verification-system) for the sender *(keep in mind this command can only be called in the verification channel and only by unverified members)*.                                                                          |
 
 <br>
 
