@@ -66,4 +66,4 @@ Below is a simple list of features that I am currently working on implementing.
 
 ## Closing Remarks
 I hope this repository helped you understand how the [Discord.Net API](https://github.com/discord-net/Discord.Net) works and maybe even taught you something new about C#!
-If your interested in this project you can join our discord [here](discord.gg/NWFkyArGcp).
+If your interested in this project you can join our discord [here](https://discord.com/invite/NWFkyArGcp).
