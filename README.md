@@ -23,3 +23,31 @@ The fencingtracker bot has a simple but effective verification system that consi
 <br>
 
 ## Bot Configuration
+To configure the bot, you must first create a new discord application. Then (after building it) create a new JSON file, name it *config*, and place it in the same directory as the executable. Next paste this into the *config.json* file:
+
+```json
+{
+    "discord": {
+      "token": "",
+      "id": "",
+      "secret": "",
+      "prefix":  "!",
+      "server": "",
+      "roles": {
+          "unverified": "",
+          "verified": "",
+          "muted": ""
+      },
+      "channels": {
+          "verify": "",
+          "welcome": "",
+          "bot-commands": ""
+      } 
+    }
+  }
+  ```
+  
+  Replace all the JSON fields (including the server, role, and channel ids) with your server and bot's properties. You can obviously change the prefix if you want. 
+  
+  Now in the same directory as the executable create a new folder and call it *logs*. This is where the bot will write it's log files, so that if it crashes unexpectedly you can review the logs and see what exactly triggered the crash.
+
