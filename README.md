@@ -1,3 +1,5 @@
+![fencingtracker logo](/logo.png)
+
 # FencingtrackerBot
 My first attempt at making a discord bot with the [Discord.Net API](https://github.com/discord-net/Discord.Net) for my current project, [fencingtracker.com](http://fencingtracker.com/).
 This repository will be kept up to date and I will add some new features here and there.
