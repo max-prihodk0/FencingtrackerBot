@@ -51,4 +51,8 @@ To configure the bot, you must first create a new discord application. Then (aft
   
   Now in the same directory as the executable create a new folder and call it *logs*. This is where the bot will write it's log files, so that if it crashes unexpectedly you can review the logs and see what exactly triggered the crash.
 
+<br>
+
 ## Closing Remarks
+I hope this repository helped you understand how the [Discord.Net API](https://github.com/discord-net/Discord.Net) works and maybe even taught you something new about C#!
+If your interested in this project you can join our discord [here](discord.gg/NWFkyArGcp)
