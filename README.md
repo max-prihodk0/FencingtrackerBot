@@ -1,4 +1,4 @@
-![fencingtracker logo](/logo.png)
+![fencingtracker logo](/ftracker.png)
 
 # FencingtrackerBot
 My first attempt at making a discord bot with the [Discord.Net API](https://github.com/discord-net/Discord.Net) for my current project, [fencingtracker.com](http://fencingtracker.com/).
