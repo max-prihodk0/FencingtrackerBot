@@ -51,3 +51,4 @@ To configure the bot, you must first create a new discord application. Then (aft
   
   Now in the same directory as the executable create a new folder and call it *logs*. This is where the bot will write it's log files, so that if it crashes unexpectedly you can review the logs and see what exactly triggered the crash.
 
+## Closing Remarks
