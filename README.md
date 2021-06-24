@@ -53,6 +53,17 @@ To configure the bot, you must first create a new discord application. Then (aft
 
 <br>
 
+## Task List
+Below is a simple list of features that I am currently working on implementing.
+
+- [x] Purge command that allows you to delete x amount of messages from a channel.
+- [ ] Ban command: ***ban [user] (reason)***.
+- [ ] Make all **reason** parameters for commands optional.
+- [ ] Add a music player module similar to rythm.
+- [ ] Add chat filter for offensive messages/words.
+
+<br>
+
 ## Closing Remarks
 I hope this repository helped you understand how the [Discord.Net API](https://github.com/discord-net/Discord.Net) works and maybe even taught you something new about C#!
-If your interested in this project you can join our discord [here](discord.gg/NWFkyArGcp)
+If your interested in this project you can join our discord [here](discord.gg/NWFkyArGcp).
