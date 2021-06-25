@@ -83,13 +83,6 @@ namespace FencingtrackerBot.DiscordBot.Services
                     return;
                 }          
             }
-            else
-            {
-                if (Utilities.CalculateSimilarity(UserMessage.Content, "what is this") == 0.9)
-                {
-
-                }
-            }
 
             SocketCommandContext SocketContext = new SocketCommandContext(SocketClient, UserMessage);
 
