@@ -30,5 +30,17 @@ namespace FencingtrackerBot.References
 
             return Builder.Build();
         }
+
+        public static Embed MakeWarningEmbed(string Message)
+        {
+            EmbedBuilder Builder = new EmbedBuilder();
+
+            Builder.AddField("Warning", Message + "\n ")
+                        .WithColor(Color.LightOrange)
+                        .WithCurrentTimestamp()
+                        .WithFooter("fencingtracker.com");
+
+            return Builder.Build();
+        }
     }
 }

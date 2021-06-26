@@ -8,6 +8,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using FencingtrackerBot.References;
+using System.Timers;
+using Discord.Rest;
 
 namespace FencingtrackerBot.DiscordBot.Services
 {
@@ -28,6 +30,85 @@ namespace FencingtrackerBot.DiscordBot.Services
             SocketClient.MessageReceived += OnMessageReceivedAsync;
         }
 
+        private async Task DirectMessageHandlerAsync(SocketUserMessage UserMessage)
+        {
+            if (DataStorage.ContainsEntry(UserMessage.Author.Id))
+            {
+                bool leave = false;
+                EmbedBuilder Builder = new EmbedBuilder();
+
+                if (DataStorage.ManageEntry(UserMessage.Author.Id, UserMessage.Content))
+                {
+                    Builder.AddField("Thank you!", $"You have been given access to the fencingtracker.com discord. Enjoy your stay!")
+                            .WithColor(Color.LightGrey)
+                            .WithFooter("fencingtracker.com")
+                            .WithCurrentTimestamp();
+
+                    await UserMessage.Author.SendMessageAsync(embed: Builder.Build());
+
+                    await SocketClient.GetGuild(ulong.Parse(Configuration["discord:server"])).GetUser(UserMessage.Author.Id).AddRoleAsync(ulong.Parse(Configuration["discord:roles:verified"]));
+                    return;
+                }
+                else
+                {
+                    if (DataStorage.ContainsEntry(UserMessage.Author.Id))
+                    {
+                        string AttemptOrAttempts = DataStorage.GetTries(UserMessage.Author.Id) == 1 ? "attempt" : "attempts";
+                        Builder.AddField("Invalid Response", $"Sorry, the code that you just typed does not match the given captcha.\nYou have **{DataStorage.GetTries(UserMessage.Author.Id)}** {AttemptOrAttempts} remaining.")
+                            .WithColor(Color.LightGrey)
+                            .WithFooter("fencingtracker.com")
+                            .WithCurrentTimestamp();
+                    }
+                    else
+                    {
+                        Builder.AddField("Invalid Response", $"Sorry, the code that you just typed does not match the given captcha.\nYou have **0** attempts remaining.\n\nPlease rejoin our server to obtain a new captcha.")
+                            .WithColor(Color.LightGrey)
+                            .WithFooter("fencingtracker.com")
+                            .WithCurrentTimestamp();
+
+                        leave = true;
+                    }
+                }
+
+                await UserMessage.Author.SendMessageAsync(embed: Builder.Build());
+
+                if (leave)
+                    await SocketClient.GetGuild(ulong.Parse(Configuration["discord:server"])).GetUser(UserMessage.Author.Id).KickAsync("Failed captia completion.");
+            }
+        }
+
+        private async Task FilterMessageAsync(SocketUserMessage UserMessage, string Word)
+        {
+            if (LavenshteinDistance.IsSimilar(Word, "bad"))
+            {
+                await UserMessage.DeleteAsync();
+                RestUserMessage Msg = await UserMessage.Channel.SendMessageAsync(embed: Utilities.MakeWarningEmbed($"{UserMessage.Author.Mention} watch your language! Try not to use swear words when communicating in this server. I know it's hard but I beleive in you! :heart:"));
+
+                Timer Timer = new Timer(5000);
+                Timer.Enabled = true;
+                Timer.Elapsed += async (sender, e) =>
+                {
+                    await Msg.DeleteAsync();
+                    Timer.Stop();
+                };
+            }
+        }
+
+        private async Task HandleUserMessageAsync(SocketUserMessage UserMessage)
+        {
+            string[] Words = UserMessage.Content.Split(' ');
+
+            if (Words.Length > 1)
+            {
+                for (int i = 0; i < Words.Length; i++)
+                {
+                    await FilterMessageAsync(UserMessage, Words[i]);
+                }
+            }
+            else
+                await FilterMessageAsync(UserMessage, UserMessage.Content);
+        }
+
         private async Task OnMessageReceivedAsync(SocketMessage Message)
         {
             SocketUserMessage UserMessage = Message as SocketUserMessage;
@@ -35,59 +116,17 @@ namespace FencingtrackerBot.DiscordBot.Services
             // Ensure that the message is from an actual user and not the bot or other bots
             if (UserMessage == null || UserMessage.Author.Id == SocketClient.CurrentUser.Id)
                 return;
-            
-            if (UserMessage.Channel.Name.Contains(UserMessage.Author.Username))
+
+            if (Message.Channel is IDMChannel)
             {
-                if (DataStorage.ContainsEntry(UserMessage.Author.Id))
-                {
-                    bool leave = false;
-                    EmbedBuilder Builder = new EmbedBuilder();
-
-                    if (DataStorage.ManageEntry(UserMessage.Author.Id, UserMessage.Content))
-                    {
-                        Builder.AddField("Thank you!", $"You have been given access to the fencingtracker.com discord. Enjoy your stay!")
-                                .WithColor(Color.LightGrey)
-                                .WithFooter("fencingtracker.com")
-                                .WithCurrentTimestamp();
-
-                        await UserMessage.Author.SendMessageAsync(embed: Builder.Build());
-
-                        await SocketClient.GetGuild(ulong.Parse(Configuration["discord:server"])).GetUser(UserMessage.Author.Id).AddRoleAsync(ulong.Parse(Configuration["discord:roles:verified"]));                                      
-                        return;
-                    }
-                    else
-                    {
-                        if (DataStorage.ContainsEntry(UserMessage.Author.Id))
-                        {
-                            string AttemptOrAttempts = DataStorage.GetTries(UserMessage.Author.Id) == 1 ? "attempt" : "attempts"; 
-                            Builder.AddField("Invalid Response", $"Sorry, the code that you just typed does not match the given captcha.\nYou have **{DataStorage.GetTries(UserMessage.Author.Id)}** {AttemptOrAttempts} remaining.")
-                                .WithColor(Color.LightGrey)
-                                .WithFooter("fencingtracker.com")
-                                .WithCurrentTimestamp();
-                        }
-                        else
-                        {
-                            Builder.AddField("Invalid Response", $"Sorry, the code that you just typed does not match the given captcha.\nYou have **0** attempts remaining.\n\nPlease rejoin our server to obtain a new captcha.")
-                                .WithColor(Color.LightGrey)
-                                .WithFooter("fencingtracker.com")
-                                .WithCurrentTimestamp();
-
-                            leave = true;
-                        }
-                    }
-
-                    await UserMessage.Author.SendMessageAsync(embed: Builder.Build());
-
-                    if (leave)
-                        await SocketClient.GetGuild(ulong.Parse(Configuration["discord:server"])).GetUser(UserMessage.Author.Id).KickAsync("Failed captia completion.");
-                    return;
-                }          
-            }
+                await DirectMessageHandlerAsync(UserMessage);
+                return;
+            }            
 
             SocketCommandContext SocketContext = new SocketCommandContext(SocketClient, UserMessage);
 
             int Position = 0;
-            if ((UserMessage.HasStringPrefix(Configuration["discord:prefix"], ref Position) || UserMessage.HasMentionPrefix(SocketClient.CurrentUser, ref Position)) 
+            if ((UserMessage.HasStringPrefix(Configuration["discord:prefix"], ref Position) || UserMessage.HasMentionPrefix(SocketClient.CurrentUser, ref Position))
                 && (UserMessage.Channel.Id == ulong.Parse(Configuration["discord:channels:bot-commands"]) || UserMessage.Channel.Id == ulong.Parse(Configuration["discord:channels:verify"])))
             {
                 IResult Result = await Commands.ExecuteAsync(SocketContext, Position, Provider);
@@ -95,8 +134,10 @@ namespace FencingtrackerBot.DiscordBot.Services
                 if (!Result.IsSuccess)
                 {
                     await SocketContext.Channel.SendMessageAsync(embed: Utilities.MakeErrorEmbed($"The command \"**{UserMessage.Content.Substring(1)}**\" does not exist in this context."));
-                }     
+                }
             }
+            else
+                await HandleUserMessageAsync(UserMessage);
         }
     }
 }

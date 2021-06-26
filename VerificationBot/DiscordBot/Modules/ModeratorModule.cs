@@ -83,6 +83,7 @@ namespace FencingtrackerBot.DiscordBot.Modules
             Timer.Elapsed += async (sender, e) => 
             {
                 await User.RemoveRoleAsync(ulong.Parse(Configuration["discord:roles:muted"]));
+                Timer.Stop();
             };
 
             EmbedBuilder Builder = new EmbedBuilder();
