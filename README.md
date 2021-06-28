@@ -22,7 +22,7 @@ The fencingtracker bot has a simple but effective verification system that consi
 
 <br>
 
-## Chat filter <img src="https://github.com/max-prihodk0/FencingtrackerBot/blob/main/icons8-new-50%20(1).png" width="10" height="10">
+## Chat filter <img src="https://github.com/max-prihodk0/FencingtrackerBot/blob/main/icons8-new-50%20(1).png" width="25" height="25">
 
 ## Bot Configuration
 To configure the bot, you must first create a new discord application. Then (after building it) create a new JSON file, name it *config*, and place it in the same directory as the executable. Next paste this into the *config.json* file:
