@@ -22,7 +22,8 @@ The fencingtracker bot has a simple but effective verification system that consi
 
 <br>
 
-## Chat filter <img src="https://github.com/max-prihodk0/FencingtrackerBot/blob/main/icons8-new-50%20(1).png" width="20" height="20">
+## Chat filter 
+(Coming soon)
 
 <br>
 
