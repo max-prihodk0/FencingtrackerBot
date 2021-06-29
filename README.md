@@ -16,14 +16,9 @@ This repository will be kept up to date and I will add some new features here an
 ## Verification System
 The fencingtracker bot has a simple but effective verification system that consists of three simple steps:
 
-1. First, the user notifies the bot that they would like to get verified by typing ***!verify*** in the official verification channel. The bot will send the user a message containing a captcha.
+1. First, the user notifies the bot that they would like to get verified by joining the server. The bot will send the user a message containing a captcha.
 2. Next, the user must complete the captia and send the correct code to the bot via a **direct message**.
 3. Finally, if the user completed the captcha correctly, they will be granted access to the server.
-
-<br>
-
-## Chat filter 
-(Coming soon)
 
 <br>
 
@@ -39,20 +34,25 @@ To configure the bot, you must first create a new discord application. Then (aft
       "prefix":  "!",
       "server": "",
       "roles": {
-          "unverified": "",
           "verified": "",
           "muted": ""
       },
       "channels": {
-          "verify": "",
           "welcome": "",
           "bot-commands": ""
       } 
     }
+    "sql": {
+      "server": "",
+      "database": "",
+      "user": "",
+      "password": "",
+      "port": ""
+    }
   }
   ```
   
-  Replace all the JSON fields (including the server, role, and channel ids) with your server and bot's properties. You can obviously change the prefix if you want. 
+  Replace all the JSON fields (including the server, role, and channel ids) with your server and bot's properties. If you were wondering, yes, you do need to set up a MySQL server if you want this app to run as intended, you can read about the bot's database structure here. You can obviously change the prefix if you want.  
   
   Now in the same directory as the executable create a new folder and call it *logs*. This is where the bot will write it's log files, so that if it crashes unexpectedly you can review the logs and see what exactly triggered the crash.
 
