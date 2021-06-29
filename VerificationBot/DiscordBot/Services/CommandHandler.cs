@@ -122,6 +122,10 @@ namespace FencingtrackerBot.DiscordBot.Services
             }
             else
                 await FilterMessageAsync(UserMessage, UserMessage.Content);
+
+            Member Member = SQL.GetMember(UserMessage.Author.Id);
+            Member.MessagesSent++;
+            SQL.Context.SaveChanges();
         }
 
         private async Task OnMessageReceivedAsync(SocketMessage Message)

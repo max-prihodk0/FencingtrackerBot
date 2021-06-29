@@ -107,16 +107,6 @@ namespace FencingtrackerBot.DiscordBot.Services
 
             // Establish SQL connection
             SQL.EstablishConnection(Configuration);
-
-            /*foreach (var User in SocketClient.GetGuild(ulong.Parse(Configuration["discord:server"])).Users)
-            {
-                SQL.Add(new Member
-                {
-                    UserId = Convert.ToInt64(User.Id),
-                    Warnings = 0,
-                    MessagesSent = 0
-                });
-            }*/
         }
     }
 }
