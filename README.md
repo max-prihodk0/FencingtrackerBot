@@ -58,6 +58,11 @@ To configure the bot, you must first create a new discord application. Then (aft
 
 <br>
 
+## Database structure
+The bot has a simple database strucure which consists of 2 tables, the ***Verification*** table and the ***Members*** table. The ***Verification*** table has 3 columns: *Id*, *Captcha*, and *Tries*. The ***Members*** table has four columns: *UserId*, *Warnings*, *MessagesSent*, and *VerificationId* (Which is a foreign key). The [Models.cs](https://github.com/max-prihodk0/FencingtrackerBot/blob/main/VerificationBot/References/SQL/Models.cs) file depicts it perfectly.
+
+<br>
+
 ## Task List
 Below is a simple list of features that I am hoping to complete in the near future.
 
