@@ -41,7 +41,7 @@ To configure the bot, you must first create a new discord application. Then (aft
           "welcome": "",
           "bot-commands": ""
       } 
-    }
+    },
     "sql": {
       "server": "",
       "database": "",
