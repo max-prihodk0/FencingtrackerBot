@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using FencingtrackerBot.References;
 using System.Timers;
 using Discord.Rest;
+using FencingtrackerBot.References.SQL;
 
 namespace FencingtrackerBot.DiscordBot.Services
 {
@@ -32,12 +33,14 @@ namespace FencingtrackerBot.DiscordBot.Services
 
         private async Task DirectMessageHandlerAsync(SocketUserMessage UserMessage)
         {
-            if (DataStorage.ContainsEntry(UserMessage.Author.Id))
+            Member Member = SQL.GetMember(UserMessage.Author.Id);
+
+            if (Member.Verification != null)
             {
                 bool leave = false;
                 EmbedBuilder Builder = new EmbedBuilder();
 
-                if (DataStorage.ManageEntry(UserMessage.Author.Id, UserMessage.Content))
+                if (Member.Verification.Captcha == UserMessage.Content)
                 {
                     Builder.AddField("Thank you!", $"You have been given access to the fencingtracker.com discord. Enjoy your stay!")
                             .WithColor(Color.LightGrey)
@@ -47,14 +50,21 @@ namespace FencingtrackerBot.DiscordBot.Services
                     await UserMessage.Author.SendMessageAsync(embed: Builder.Build());
 
                     await SocketClient.GetGuild(ulong.Parse(Configuration["discord:server"])).GetUser(UserMessage.Author.Id).AddRoleAsync(ulong.Parse(Configuration["discord:roles:verified"]));
+
+                    SQL.Context.Verification.Remove(Member.Verification);
+                    Member.Verification = null;
+                    SQL.Context.SaveChanges();
+
                     return;
                 }
                 else
                 {
-                    if (DataStorage.ContainsEntry(UserMessage.Author.Id))
+                    Member.Verification.Tries--;
+
+                    if (Member.Verification.Tries > 0)
                     {
-                        string AttemptOrAttempts = DataStorage.GetTries(UserMessage.Author.Id) == 1 ? "attempt" : "attempts";
-                        Builder.AddField("Invalid Response", $"Sorry, the code that you just typed does not match the given captcha.\nYou have **{DataStorage.GetTries(UserMessage.Author.Id)}** {AttemptOrAttempts} remaining.")
+                        string AttemptOrAttempts = Member.Verification.Tries == 1 ? "attempt" : "attempts";
+                        Builder.AddField("Invalid Response", $"Sorry, the code that you just typed does not match the given captcha.\nYou have **{Member.Verification.Tries}** {AttemptOrAttempts} remaining.")
                             .WithColor(Color.LightGrey)
                             .WithFooter("fencingtracker.com")
                             .WithCurrentTimestamp();
@@ -67,8 +77,13 @@ namespace FencingtrackerBot.DiscordBot.Services
                             .WithCurrentTimestamp();
 
                         leave = true;
+                        
                     }
                 }
+
+                SQL.Context.Verification.Remove(Member.Verification);
+                Member.Verification = null;
+                SQL.Context.SaveChanges();
 
                 await UserMessage.Author.SendMessageAsync(embed: Builder.Build());
 
@@ -127,7 +142,7 @@ namespace FencingtrackerBot.DiscordBot.Services
 
             int Position = 0;
             if ((UserMessage.HasStringPrefix(Configuration["discord:prefix"], ref Position) || UserMessage.HasMentionPrefix(SocketClient.CurrentUser, ref Position))
-                && (UserMessage.Channel.Id == ulong.Parse(Configuration["discord:channels:bot-commands"]) || UserMessage.Channel.Id == ulong.Parse(Configuration["discord:channels:verify"])))
+                && (UserMessage.Channel.Id == ulong.Parse(Configuration["discord:channels:bot-commands"])))
             {
                 IResult Result = await Commands.ExecuteAsync(SocketContext, Position, Provider);
 
