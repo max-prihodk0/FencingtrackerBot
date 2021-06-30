@@ -94,7 +94,7 @@ namespace FencingtrackerBot.DiscordBot.Services
 
         private async Task FilterMessageAsync(SocketUserMessage UserMessage, string Word)
         {
-            if (LavenshteinDistance.IsSimilar(Word, "bad"))
+            if (Utilities.FilterMessage(Word))
             {
                 await UserMessage.DeleteAsync();
                 RestUserMessage Msg = await UserMessage.Channel.SendMessageAsync(embed: Utilities.MakeWarningEmbed($"{UserMessage.Author.Mention} watch your language! Try not to use swear words when communicating in this server. I know it's hard but I beleive in you! :heart:"));
@@ -111,17 +111,7 @@ namespace FencingtrackerBot.DiscordBot.Services
 
         private async Task HandleUserMessageAsync(SocketUserMessage UserMessage)
         {
-            string[] Words = UserMessage.Content.Split(' ');
-
-            if (Words.Length > 1)
-            {
-                for (int i = 0; i < Words.Length; i++)
-                {
-                    await FilterMessageAsync(UserMessage, Words[i]);
-                }
-            }
-            else
-                await FilterMessageAsync(UserMessage, UserMessage.Content);
+            await FilterMessageAsync(UserMessage, UserMessage.Content);
 
             Member Member = SQL.GetMember(UserMessage.Author.Id);
             Member.MessagesSent++;
