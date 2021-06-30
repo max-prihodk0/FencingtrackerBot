@@ -75,7 +75,7 @@ CREATE TABLE Verification (
 **Members Table**
 ```sql
 CREATE TABLE Members (
-    UserId BIGINT UNSIGNED PRIMARY KEY NOT NULL,
+    UserId BIGINT PRIMARY KEY NOT NULL,
     `Warnings` INT NOT NULL,
     MessagesSent INT NOT NULL,
     VerificationId INT,
