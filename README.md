@@ -76,7 +76,7 @@ CREATE TABLE Verification (
 ```sql
 CREATE TABLE Members (
     UserId BIGINT PRIMARY KEY NOT NULL,
-    `Warnings` INT NOT NULL,
+    Warnings INT NOT NULL,
     MessagesSent INT NOT NULL,
     VerificationId INT,
     FOREIGN KEY (VerificationId) REFERENCES Verification(Id)
