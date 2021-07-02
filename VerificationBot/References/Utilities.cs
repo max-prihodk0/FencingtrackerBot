@@ -46,6 +46,18 @@ namespace FencingtrackerBot.References
             return Builder.Build();
         }
 
+        public static Embed MakeInfoImbed(string Title, string Message)
+        {
+            EmbedBuilder Builder = new EmbedBuilder();
+
+            Builder.AddField(Title, Message + "\n ")
+                        .WithColor(Color.LightGrey)
+                        .WithCurrentTimestamp()
+                        .WithFooter("fencingtracker.com");
+
+            return Builder.Build();
+        }
+
         public static string RemoveDuplicates(string Input)
         {
             return new string(new HashSet<char>(Input).ToArray());

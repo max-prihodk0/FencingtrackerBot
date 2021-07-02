@@ -70,6 +70,9 @@ namespace FencingtrackerBot.DiscordBot.Services
             IMessageChannel Channel = SocketClient.GetChannel(ulong.Parse(Configuration["discord:channels:welcome"])) as IMessageChannel;
             await Channel.SendMessageAsync(text: $"Welcome {User.Mention} to the server! 🎉");
 
+            if (!bool.Parse(Configuration["discord:settings:verification"]))
+                return;
+
             Captcha Captcha = new Captcha();
             string FileName = Captcha.GenerateCaptcha();
 
