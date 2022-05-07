@@ -66,9 +66,7 @@ namespace FencingtrackerBot.References.SQL
         {
             int Return = 0;
             foreach (var Member in Context.Verification)
-            {
                 Return++;
-            }
             return Return;
         }
     }

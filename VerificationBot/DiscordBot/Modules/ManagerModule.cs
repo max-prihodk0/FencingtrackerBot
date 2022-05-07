@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using System.IO;
 using Newtonsoft.Json;
+using System.Security.Cryptography;
 
 namespace FencingtrackerBot.DiscordBot.Modules
 {
@@ -30,34 +31,26 @@ namespace FencingtrackerBot.DiscordBot.Modules
             JsonObject = JsonConvert.DeserializeObject(File.ReadAllText("./config.json"));
         }
 
-        [Command("enable verify")]
-        [Description("Enables the captcha verification system for the server.")]
+        [Command("system verify")]
+        [Summary("Enables or disables the captcha verification system for the server.")]
         [RequireUserPermission(GuildPermission.Administrator)]
-        public async Task EnableVerification()
+        public async Task StartAsync()
         {
             if (Configuration["discord:settings:verification"] == "true")
             {
-                await ReplyAsync(embed: Utilities.MakeErrorEmbed("Oops! It looks like the verification system is already enabled!"));
+                await DisableVerification();
                 return;
             }
 
             JsonObject["discord"]["settings"]["verification"] = "true";
             File.WriteAllText("./config.json", JsonConvert.SerializeObject(JsonObject, Formatting.Indented));
+
+            await ReplyAsync(embed: Utilities.MakeSuccessEmbed("Successfully enabled the verification system. If you would like to disable it, you can use the **disable verify** command."));
         }
 
         ulong MessageId = 0;
-
-        [Command("disable verify")]
-        [Description("Disables the captcha verification system for the server **(not recommended)**.")]
-        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task DisableVerification()
         {
-            if (Configuration["discord:settings:verification"] == "false")
-            {
-                await ReplyAsync(embed: Utilities.MakeErrorEmbed("Oops! It looks like the verification system is already disabled!"));
-                return;
-            }
-
             var Message = await Context.Channel.SendMessageAsync(embed: Utilities.MakeInfoImbed("Conformation", "Are you sure you want to disable this feature? I do **not** recommend you disable this feature, as this will make your server vulnerable to malicious bot attacks."));
 
             Emoji Check = new Emoji("✅");
@@ -68,12 +61,35 @@ namespace FencingtrackerBot.DiscordBot.Modules
             SocketClient.ReactionAdded += OnReactionAddedAsync;
         }
 
-        /*[Command("enable filter")]
-        [Description("Enables the chat filter across all channels in the current guild.")]
-        public async Task EnableFilterAsync()
+        [Command("system filter")]
+        [Summary("Enables or disables the chat filter across all channels in the current guild.")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task StartAsync2()
         {
+            if (Configuration["discord:settings:chat-filter"] == "true")
+            {
+                await DisableFilterAsync();
+                return;
+            }
 
-        }*/
+            JsonObject["discord"]["settings"]["chat-filter"] = "true";
+            File.WriteAllText("./config.json", JsonConvert.SerializeObject(JsonObject, Formatting.Indented));
+
+            await ReplyAsync(embed: Utilities.MakeSuccessEmbed("Successfully enabled the chat filter. If you would like to disable it, you can use the **disable filter** command."));
+        }
+
+        ulong MessageId2 = 0;
+        public async Task DisableFilterAsync()
+        {
+            var Message = await Context.Channel.SendMessageAsync(embed: Utilities.MakeInfoImbed("Conformation", "Are you sure you want to disable this feature?"));
+
+            Emoji Check = new Emoji("✅");
+            Emoji Cross = new Emoji("❌");
+            await Message.AddReactionsAsync(new IEmote[] { Check, Cross });
+            MessageId2 = Message.Id;
+
+            SocketClient.ReactionAdded += OnReactionAddedAsync;
+        }
 
         private async Task OnReactionAddedAsync(Cacheable<IUserMessage, ulong> Message, ISocketMessageChannel Channel, SocketReaction Reaction)
         {
@@ -85,6 +101,16 @@ namespace FencingtrackerBot.DiscordBot.Modules
                 await ReplyAsync(embed: Utilities.MakeSuccessEmbed("Successfully disabled the verification system. If you would like to re-enable the system, you can use the **enable verify** command."));
 
                 JsonObject["discord"]["settings"]["verification"] = "false";
+                File.WriteAllText("./config.json", JsonConvert.SerializeObject(JsonObject, Formatting.Indented));
+            }
+            else if (MessageId2 == Message.Id)
+            {
+                if (Reaction.Emote.Name != "✅")
+                    return;
+
+                await ReplyAsync(embed: Utilities.MakeSuccessEmbed("Successfully disabled the chat filter. If you would like to re-enable the system, you can use the **enable filter** command."));
+
+                JsonObject["discord"]["settings"]["chat-filter"] = "false";
                 File.WriteAllText("./config.json", JsonConvert.SerializeObject(JsonObject, Formatting.Indented));
             }
         }

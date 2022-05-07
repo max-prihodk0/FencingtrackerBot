@@ -31,7 +31,7 @@ namespace FencingtrackerBot.DiscordBot.Services
             SocketClient.MessageReceived += OnMessageReceivedAsync;
         }
 
-        private async Task DirectMessageHandlerAsync(SocketUserMessage UserMessage)
+        private async Task<bool> DirectMessageHandlerAsync(SocketUserMessage UserMessage)
         {
             Member Member = SQL.GetMember(UserMessage.Author.Id);
 
@@ -55,7 +55,7 @@ namespace FencingtrackerBot.DiscordBot.Services
                     Member.Verification = null;
                     SQL.Context.SaveChanges();
 
-                    return;
+                    return true;
                 }
                 else
                 {
@@ -89,7 +89,10 @@ namespace FencingtrackerBot.DiscordBot.Services
 
                 if (leave)
                     await SocketClient.GetGuild(ulong.Parse(Configuration["discord:server"])).GetUser(UserMessage.Author.Id).KickAsync("Failed captia completion.");
+                return true;
             }
+
+            return false;
         }
 
         private async Task FilterMessageAsync(SocketUserMessage UserMessage, string Word)
@@ -128,15 +131,15 @@ namespace FencingtrackerBot.DiscordBot.Services
 
             if (Message.Channel is IDMChannel)
             {
-                await DirectMessageHandlerAsync(UserMessage);
-                return;
+                if (await DirectMessageHandlerAsync(UserMessage))
+                    return;
             }            
 
             SocketCommandContext SocketContext = new SocketCommandContext(SocketClient, UserMessage);
 
             int Position = 0;
             if ((UserMessage.HasStringPrefix(Configuration["discord:prefix"], ref Position) || UserMessage.HasMentionPrefix(SocketClient.CurrentUser, ref Position))
-                && (UserMessage.Channel.Id == ulong.Parse(Configuration["discord:channels:bot-commands"])))
+                && (UserMessage.Channel.Id == ulong.Parse(Configuration["discord:channels:bot-commands"]) || Message.Channel is IDMChannel))
             {
                 IResult Result = await Commands.ExecuteAsync(SocketContext, Position, Provider);
 

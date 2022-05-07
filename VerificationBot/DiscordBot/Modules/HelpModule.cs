@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.VisualBasic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,18 +35,28 @@ namespace FencingtrackerBot.DiscordBot.Modules
 
             foreach(ModuleInfo Module in Commands.Modules)
             {
+                if (Module.Name == "Help")
+                    continue;
+
                 string Description = "";
                 foreach (CommandInfo Command in Module.Commands)
                 {
                     PreconditionResult Result = await Command.CheckPreconditionsAsync(Context);
                     if (Result.IsSuccess)
                     {
-                        Description = Configuration["discord:prefix"] + Command.Name;
-
-                        foreach (ParameterInfo Parameter in Command.Parameters)
+                        if (Command.Name == "poll")
+                            Description += "!poll \"<message>\" \"<choice 1>\" \"<choice 2>\"";
+                        else
                         {
-                            Description += " <" + Parameter.Name.ToLower() + ">";
+                            Description += Configuration["discord:prefix"] + Command.Name;
+
+                            foreach (ParameterInfo Parameter in Command.Parameters)
+                            {
+                                Description += " <" + Parameter.Name.ToLower() + ">";
+                            }
                         }
+
+                        Description += '\n';
                     }    
                 }
                 if (!string.IsNullOrWhiteSpace(Description))

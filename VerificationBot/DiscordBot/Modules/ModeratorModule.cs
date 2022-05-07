@@ -7,6 +7,9 @@ using System;
 using System.Threading.Tasks;
 using FencingtrackerBot.References;
 using Microsoft.Extensions.Configuration;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Collections.Generic;
 
 namespace FencingtrackerBot.DiscordBot.Modules
 {
@@ -28,7 +31,17 @@ namespace FencingtrackerBot.DiscordBot.Modules
         {
             await ReplyAsync(embed: Utilities.MakeSuccessEmbed($"Successfuly kicked {User.Mention} from the server."));
 
-            await User.KickAsync(reason: Reason);
+            await User.KickAsync(Reason);
+        }
+
+        [Command("bans")]
+        [Summary("Bans the specified user from the server.")]
+        [RequireUserPermission(GuildPermission.BanMembers)]
+        public async Task BanAsync(SocketGuildUser User, int Days, [Remainder]string Reason)
+        {
+            await ReplyAsync(embed: Utilities.MakeSuccessEmbed($"Successfuly banned {User.Mention} from the server."));
+
+            await User.BanAsync(Days, Reason);
         }
 
         [Command("mute")]
@@ -96,6 +109,89 @@ namespace FencingtrackerBot.DiscordBot.Modules
             await User.SendMessageAsync(embed: Builder.Build());
 
             await ReplyAsync(embed: Utilities.MakeSuccessEmbed($"Successfuly muted {User.Mention} for {Duration.Days} {(Duration.Days != 1 ? "days" : "day")} {Duration.Hours} {(Duration.Hours != 1 ? "hours" : "hour")} {Duration.Minutes} {(Duration.Minutes != 1 ? "minutes" : "minute")}."));    
+        }
+
+        [Command("purge")]
+        [Summary("Deletes an amount of messages from the specified channel.")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task PurgeChannelAsync(ISocketMessageChannel Channel, int Amount)
+        {
+            if (Amount <= 0)
+            {
+                await ReplyAsync(embed: Utilities.MakeErrorEmbed("The amount of messages to remove must be positive."));
+                return;
+            }
+
+            var Messages = await Channel.GetMessagesAsync(Amount).FlattenAsync();
+            var FilteredMessages = Messages.Where(x => (DateTimeOffset.UtcNow - x.Timestamp).TotalDays <= 14);
+
+            int Count = FilteredMessages.Count();
+
+            if (Count == 0)
+            {
+                await ReplyAsync(embed: Utilities.MakeErrorEmbed("There are no messages to delete."));
+            }
+            else
+            {
+                await (Channel as ITextChannel).DeleteMessagesAsync(FilteredMessages);
+                await ReplyAsync(embed: Utilities.MakeSuccessEmbed($"Successfuly removed {Count} {(Count > 1 ? "messages" : "message")} from the <#{Channel.Id}> channel."));
+            }
+        }
+
+        [Command("purge")]
+        [Summary("Deletes all messages 14 days or younger from the specified channel.")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task PurgeAllChannelsAsync(ISocketMessageChannel Channel)
+            => await PurgeChannelAsync(Channel, 9999);
+
+        private readonly string[] numbers = new string[10]
+        {
+            "1️⃣",
+            "2️⃣",
+            "3️⃣",
+            "4️⃣",
+            "5️⃣",
+            "6️⃣",
+            "7️⃣",
+            "8️⃣",
+            "9️⃣",
+            "🔟"
+        };
+
+        [Command("poll")]
+        [Summary("Creates a poll with the specified question with a maximum of 10 options. The bot will post and notify everyone in the announcements channel.")]
+        [RequireContext(ContextType.Guild)]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task CreatePollAsync([Remainder]string Message)
+        {
+            IList<string> options = new List<string>();
+
+            // Parse input
+            foreach (Match match in Regex.Matches(Message, "\"([^\"]*)\""))
+                options.Add(match.ToString().Trim('"'));
+
+            string name = options.First();
+            options.RemoveAt(0);
+
+
+            if (options.Count > 10)
+            {
+                await ReplyAsync(embed: Utilities.MakeErrorEmbed("You can only have a maximum of 10 options"));
+                return;
+            }
+
+            string Description = name + "\n--------------------------------------------------------------------------\n\n**Options:**\n";
+
+            for (int i = 0; i < options.Count; i++)
+            {
+                Description += $"{options[i]}\t{numbers[i]}  ";
+            }
+
+            var pollMessage = await (Context.Guild.GetChannel(ulong.Parse(Configuration["discord:channels:announcements"])) as ISocketMessageChannel).SendMessageAsync(embed: Utilities.MakeInfoImbed("Poll :ballot_box:", Description));
+
+            for (int i = 0; i < options.Count; i++)
+                await pollMessage.AddReactionAsync(new Emoji(numbers[i]));
+        
         }
     }
 }
